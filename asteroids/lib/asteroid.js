@@ -1,11 +1,31 @@
 const Utils = require('./utils');
 const MovingObject = require('./moving_object');
 
-function Asteroid(pos) {
-  options = { pos: pos, vel: Utils.randomVec(10), color: '#DA4913', radius: 30 }
+function Asteroid(pos, game) {
+  options = { pos: pos, vel: Utils.randomVec(10), color: Asteroid.randColor(), radius: 30, game: game }
   MovingObject.call(this, options);
 }
 
+
+
 Utils.inherits(Asteroid, MovingObject);
+
+Asteroid.randColor = function() {
+  let colors = [
+    '#16EBEB', '#E516EB', '#D6E72E', '#797771', '#0F20CC', '#8F95CD', '#A136DA', '#180607'
+  ];
+  let chosen = Math.floor(Math.random()*colors.length);
+
+  return colors[chosen];
+}
+
+Asteroid.prototype.collideWith = function(otherObject) {
+  if(otherObject.constructor.name == 'Ship') {
+    if( this.radius < 150 ) {
+      this.radius *= 1.1
+    }
+    otherObject.relocate();
+  }
+}
 
 module.exports = Asteroid;
