@@ -9,6 +9,8 @@ function Bullet(game) {
 
 Utils.inherits(Bullet, MovingObject);
 
+Bullet.prototype.isWrappable = false;
+
 Bullet.getVelocity = function(game) {
   let ship_vel = game.ship.vel.slice(0);
   return ship_vel.map( n => {

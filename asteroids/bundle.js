@@ -167,6 +167,14 @@
 
 	}
 
+	Game.prototype.isOutOfBounds = function(pos) {
+	  if( pos[0] > this.DIM_X || pos[0] < 0 || pos[1] > this.DIM_Y || pos[1] < 0 ) {
+	    return true;
+	  } else {
+	    return false;
+	  }
+	}
+
 	Game.prototype.checkCollisions = function() {
 	  for(let i = 0; i < this.allObjects().length; i++ ) {
 	    for(let j = 0; j < this.allObjects().length; j++ ) {
@@ -196,6 +204,9 @@
 	  if( object instanceof Asteroid ) {
 	    let idx = this.asteroids.indexOf( object );
 	    this.asteroids = this.asteroids.slice(0,idx).concat(this.asteroids.slice(idx+1));
+	  } else if(object instanceof Bullet) {
+	    let idx = this.bullets.indexOf( object );
+	    this.bullets = this.bullets.slice(0,idx).concat(this.bullets.slice(idx+1));
 	  }
 	}
 
@@ -271,10 +282,18 @@
 	  this.game = options.game;
 	}
 
+	MovingObject.prototype.isWrappable = true;
+
 	MovingObject.prototype.move = function() {
 	  this.pos[0] += this.vel[0];
 	  this.pos[1] += this.vel[1];
-	  this.pos = this.game.wrap(this.pos)
+	  if(this.isWrappable) {
+	    this.pos = this.game.wrap(this.pos)
+	  } else {
+	    if( this.game.isOutOfBounds(this.pos) ) {
+	      this.game.remove(this);
+	    }
+	  }
 	}
 
 	MovingObject.prototype.draw = function(ctx) {
@@ -322,6 +341,8 @@
 	}
 
 	Utils.inherits(Bullet, MovingObject);
+
+	Bullet.prototype.isWrappable = false;
 
 	Bullet.getVelocity = function(game) {
 	  let ship_vel = game.ship.vel.slice(0);

@@ -55,6 +55,14 @@ Game.prototype.wrap = function(pos) {
 
 }
 
+Game.prototype.isOutOfBounds = function(pos) {
+  if( pos[0] > this.DIM_X || pos[0] < 0 || pos[1] > this.DIM_Y || pos[1] < 0 ) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 Game.prototype.checkCollisions = function() {
   for(let i = 0; i < this.allObjects().length; i++ ) {
     for(let j = 0; j < this.allObjects().length; j++ ) {
@@ -84,6 +92,9 @@ Game.prototype.remove = function(object) {
   if( object instanceof Asteroid ) {
     let idx = this.asteroids.indexOf( object );
     this.asteroids = this.asteroids.slice(0,idx).concat(this.asteroids.slice(idx+1));
+  } else if(object instanceof Bullet) {
+    let idx = this.bullets.indexOf( object );
+    this.bullets = this.bullets.slice(0,idx).concat(this.bullets.slice(idx+1));
   }
 }
 
