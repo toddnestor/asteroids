@@ -1,9 +1,10 @@
+const Utils = require('./utils');
 const MovingObject = require('./moving_object');
 
 function Ship() {
 
 }
 
-Ship.inherits(MovingObject);
+Utils.inherits(Ship , MovingObject);
 
 module.exports = Ship;
