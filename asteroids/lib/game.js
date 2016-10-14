@@ -7,6 +7,10 @@ function Game() {
   this.addAsteroids();
   this.bullets = [];
   this.ship = new Ship(Utils.randomVec(800), this);
+
+  this.img = new Image();
+  this.img.src = './lib/background.jpg';
+
 }
 
 Game.prototype.DIM_X = 1440;
@@ -28,7 +32,10 @@ Game.prototype.allObjects = function() {
 }
 
 Game.prototype.draw = function(ctx) {
+
+
   ctx.clearRect(0, 0, this.DIM_X, this.DIM_Y);
+  ctx.drawImage(this.img, 0, 0);
   this.allObjects().forEach(asteroid => {
     asteroid.draw(ctx);
   });

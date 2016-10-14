@@ -23,9 +23,7 @@ Bullet.getVelocity = function(game) {
 }
 
 Bullet.prototype.collideWith = function(otherObject) {
-  console.log('we collided', otherObject);
   if(otherObject instanceof Asteroid) {
-    console.log('should be removing');
     this.game.remove(otherObject);
   }
 }
