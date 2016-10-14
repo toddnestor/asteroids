@@ -15,7 +15,7 @@ function Game() {
 
 Game.prototype.DIM_X = 1440;
 Game.prototype.DIM_Y = 800;
-Game.prototype.NUM_ASTEROIDS = 4;
+Game.prototype.NUM_ASTEROIDS = 220;
 
 Game.prototype.addAsteroids = function() {
   this.asteroids = [];

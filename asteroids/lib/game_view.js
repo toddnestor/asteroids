@@ -38,6 +38,10 @@ GameView.prototype.bindKeyHandlers = function() {
   key('space', function() {
     that.game.ship.fireBullet();
   });
+
+  key('x', function() {
+    that.game.ship.vel = [0,0];
+  })
 }
 
 module.exports = GameView;

@@ -101,6 +101,10 @@
 	  key('space', function() {
 	    that.game.ship.fireBullet();
 	  });
+
+	  key('x', function() {
+	    that.game.ship.vel = [0,0];
+	  })
 	}
 
 	module.exports = GameView;
@@ -127,7 +131,7 @@
 
 	Game.prototype.DIM_X = 1440;
 	Game.prototype.DIM_Y = 800;
-	Game.prototype.NUM_ASTEROIDS = 4;
+	Game.prototype.NUM_ASTEROIDS = 220;
 
 	Game.prototype.addAsteroids = function() {
 	  this.asteroids = [];
