@@ -44,23 +44,61 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const Game = __webpack_require__(1);
+	const GameView = __webpack_require__(1);
+
+	document.addEventListener('DOMContentLoaded', function(){
+	  let ctx = document.getElementById('game-canvas').getContext('2d');
+	  let gameview = new GameView(ctx) ;
+
+	  gameview.start();
+
+	  
+
+	});
 
 
 /***/ },
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const Utils = __webpack_require__(4);
-	const Ship = __webpack_require__(2);
-	const Bullet = __webpack_require__(5);
-	const Asteroid = __webpack_require__(6);
+	const Game = __webpack_require__(2);
+	const Ship = __webpack_require__(4);
+	const Util = __webpack_require__(3);
 
-	function Game() {
+	function GameView(ctx) {
+	  this.ctx = ctx ;
+	  this.game = new Game();
+
+
 
 	}
 
-	Game.prototype.DIM_X = 1000;
+	GameView.prototype.start = function() {
+	  let that = this;
+	  setInterval( function() {
+	    that.game.moveObjects();
+	    that.game.draw(that.ctx);
+	  }, 20);
+
+	}
+
+	module.exports = GameView;
+
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const Utils = __webpack_require__(3);
+	const Ship = __webpack_require__(4);
+	const Bullet = __webpack_require__(6);
+	const Asteroid = __webpack_require__(7);
+
+	function Game() {
+	  this.addAsteroids();
+	}
+
+	Game.prototype.DIM_X = 1440;
 	Game.prototype.DIM_Y = 800;
 	Game.prototype.NUM_ASTEROIDS = 20;
 
@@ -68,20 +106,54 @@
 	  this.asteroids = [];
 
 	  for(let i = 0; i < this.NUM_ASTEROIDS; i++) {
-	    let pos = Utils.randomVec(800);
-	    this.asteroids.push(new Asteroid(pos));
+	    let pos = Utils.randomVec(this.DIM_Y);
+	    let asteroid = new Asteroid(pos);
+	    this.asteroids.push(asteroid);
 	  }
+	}
+
+	Game.prototype.draw = function(ctx) {
+	  ctx.clearRect(0, 0, this.DIM_X, this.DIM_Y);
+	  this.asteroids.forEach(asteroid => {
+	    asteroid.draw(ctx);
+	  });
+	}
+
+	Game.prototype.moveObjects = function() {
+	  this.asteroids.forEach(asteroid => asteroid.move());
 	}
 
 	module.exports = Game;
 
 
 /***/ },
-/* 2 */
+/* 3 */
+/***/ function(module, exports) {
+
+	const Utils = {
+	  inherits: function (childClass, parentClass) {
+	      function Surrogate() {}
+	      Surrogate.prototype = parentClass.prototype;
+	      childClass.prototype = new Surrogate();
+	      childClass.prototype.constructor = childClass;
+	  },
+
+	  randomVec: function(length) {
+	    let x = Math.floor(Math.random()*length)+1;
+	    let y = Math.floor(Math.random()*length)+1;
+	    return [x, y];
+	  }
+	}
+
+	module.exports = Utils;
+
+
+/***/ },
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const Utils = __webpack_require__(4);
-	const MovingObject = __webpack_require__(3);
+	const Utils = __webpack_require__(3);
+	const MovingObject = __webpack_require__(5);
 
 	function Ship() {
 
@@ -93,10 +165,10 @@
 
 
 /***/ },
-/* 3 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const Utils = __webpack_require__(4);
+	const Utils = __webpack_require__(3);
 
 	function MovingObject(options) {
 	  this.pos = options.pos;// options['pos'] <-- other syntax
@@ -110,37 +182,31 @@
 	  this.pos[1] += this.vel[1];
 	}
 
+	MovingObject.prototype.draw = function(ctx) {
+	  ctx.fillStyle = this.color;
+	  ctx.beginPath();
+
+	  ctx.arc(
+	    this.pos[0],
+	    this.pos[1],
+	    this.radius,
+	    0,
+	    2 * Math.PI,
+	    false
+	  );
+
+	  ctx.fill();
+	}
+
 	module.exports = MovingObject;
 
 
 /***/ },
-/* 4 */
-/***/ function(module, exports) {
-
-	const Utils = {
-	  inherits: function (childClass, parentClass) {
-	      function Surrogate() {}
-	      Surrogate.prototype = parentClass.prototype;
-	      childClass.prototype = new Surrogate();
-	      childClass.prototype.constructor = childClass;
-	  },
-
-	  randomVec: function(length) {
-	    let x = Math.floor(Math.random()*length);
-	    let y = Math.floor(Math.random()*length);
-	    return [x, y];
-	  }
-	}
-
-	module.exports = Utils;
-
-
-/***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const Utils = __webpack_require__(4);
-	const MovingObject = __webpack_require__(3);
+	const Utils = __webpack_require__(3);
+	const MovingObject = __webpack_require__(5);
 
 	function Bullet() {
 
@@ -152,19 +218,18 @@
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const Utils = __webpack_require__(4);
-	const MovingObject = __webpack_require__(3);
+	const Utils = __webpack_require__(3);
+	const MovingObject = __webpack_require__(5);
 
 	function Asteroid(pos) {
-	  options = { pos: pos, vel: Utils.randomVec(30), color: '#DA4913', radius: 10 }
+	  options = { pos: pos, vel: Utils.randomVec(10), color: '#DA4913', radius: 30 }
 	  MovingObject.call(this, options);
 	}
 
 	Utils.inherits(Asteroid, MovingObject);
-
 
 	module.exports = Asteroid;
 

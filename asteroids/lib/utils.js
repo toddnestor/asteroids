@@ -7,8 +7,8 @@ const Utils = {
   },
 
   randomVec: function(length) {
-    let x = Math.floor(Math.random()*length);
-    let y = Math.floor(Math.random()*length);
+    let x = Math.floor(Math.random()*length)+1;
+    let y = Math.floor(Math.random()*length)+1;
     return [x, y];
   }
 }
