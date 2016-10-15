@@ -15,7 +15,7 @@ function Game() {
 
 Game.prototype.DIM_X = 1440;
 Game.prototype.DIM_Y = 800;
-Game.prototype.NUM_ASTEROIDS = 220;
+Game.prototype.NUM_ASTEROIDS = 1;
 
 Game.prototype.addAsteroids = function() {
   this.asteroids = [];
@@ -28,7 +28,7 @@ Game.prototype.addAsteroids = function() {
 }
 
 Game.prototype.allObjects = function() {
-  return this.asteroids.concat([this.ship]).concat(this.bullets);
+  return this.asteroids.concat(this.bullets).concat([this.ship]);
 }
 
 Game.prototype.draw = function(ctx) {
@@ -73,7 +73,7 @@ Game.prototype.isOutOfBounds = function(pos) {
 Game.prototype.checkCollisions = function() {
   for(let i = 0; i < this.allObjects().length; i++ ) {
     for(let j = 0; j < this.allObjects().length; j++ ) {
-      if(i !== j) {
+      if(i !== j && i < j) {
         if(this.allObjects()[i].isCollideWith(this.allObjects()[j])) {
           this.allObjects()[i].collideWith(this.allObjects()[j]);
         }

@@ -2,11 +2,9 @@ const Utils = require('./utils');
 const MovingObject = require('./moving_object');
 
 function Asteroid(pos, game) {
-  options = { pos: pos, vel: Utils.randomVec(10), color: Asteroid.randColor(), radius: 30, game: game }
+  options = { pos: pos, vel: Utils.randomVec(10, -10), color: Asteroid.randColor(), radius: 30, game: game }
   MovingObject.call(this, options);
 }
-
-
 
 Utils.inherits(Asteroid, MovingObject);
 
@@ -19,12 +17,20 @@ Asteroid.randColor = function() {
   return colors[chosen];
 }
 
+Asteroid.prototype.mass = function() {
+  return 2 * Math.PI * this.radius;
+}
+
 Asteroid.prototype.collideWith = function(otherObject) {
   if(otherObject.constructor.name == 'Ship') {
     if( this.radius < 150 ) {
       this.radius *= 1.1
     }
     otherObject.relocate();
+  } else if(otherObject.constructor.name == 'Bullet') {
+    otherObject.collideWith(this);
+  } else if(otherObject instanceof Asteroid) {
+
   }
 }
 

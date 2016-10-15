@@ -10,11 +10,12 @@ function GameView(ctx) {
 GameView.prototype.start = function() {
   this.bindKeyHandlers();
   let that = this;
-  setInterval( function() {
+
+  window.requestAnimationFrame(function step(){
     that.game.step();
     that.game.draw(that.ctx);
-  }, 20);
-
+    window.requestAnimationFrame(step);
+  });
 }
 
 GameView.prototype.bindKeyHandlers = function() {
@@ -24,11 +25,11 @@ GameView.prototype.bindKeyHandlers = function() {
   });
 
   key('left', function() {
-    that.game.ship.power([-1,0]);
+    that.game.ship.direction -= 3;
   });
 
   key('right', function() {
-    that.game.ship.power([1,0]);
+    that.game.ship.direction += 3;
   });
 
   key('down', function() {

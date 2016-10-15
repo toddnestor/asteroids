@@ -5,7 +5,4 @@ document.addEventListener('DOMContentLoaded', function(){
   let gameview = new GameView(ctx) ;
 
   gameview.start();
-
-  
-
 });
