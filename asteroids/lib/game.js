@@ -83,8 +83,12 @@ Game.prototype.checkCollisions = function() {
 }
 
 Game.prototype.step = function() {
+  // if (!start) start = timestamp;
+  // let progress = timestamp - start;
+
   this.moveObjects();
   this.checkCollisions();
+  
 }
 
 Game.prototype.add = function(object) {
