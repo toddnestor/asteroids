@@ -20,15 +20,14 @@ Ship.prototype.MAX_POWER = 15;
 Ship.prototype.MIN_POWER = -Ship.prototype.MAX_POWER;
 Ship.prototype.MIN_TIME_BETWEEN_BULLETS = 100;
 
-Ship.prototype.showStats = function() {
-  document.getElementById('lives-lost').innerHTML = this.lives_remaining;
-  document.getElementById('asteroids-destroyed').innerHTML = this.asteroids_destroyed;
-  document.getElementById('bullets-fired').innerHTML = this.bullets_fired;
-  document.getElementById('score').innerHTML = this.score;
+Ship.prototype.showStats = function(ctx) {
+  ctx.fillStyle = "white";
+  ctx.font = "bold 20px sans-serif";
+  ctx.fillText(`Lives Remaining: ${this.lives_remaining}   Asteroids Destroyed: ${this.asteroids_destroyed}   Score: ${this.score}`, 15, 25);
 }
 
 Ship.prototype.relocate = function() {
-  this.pos = Utils.randomVec(800);
+  this.pos = [this.game.DIM_X / 2, this.game.DIM_Y / 2];
   this.direction = 90;
   this.reset();
 }
@@ -47,7 +46,7 @@ Ship.prototype.fireBullet = function() {
     if(power < 0) power = 0;
     this.bullets_fired += 1;
 
-    let vel = Utils.findNewPoint(0, 0, this.direction, (power + 5));
+    let vel = Utils.findNewPoint(0, 0, this.direction, 30);
     vel = [vel[0], -vel[1]];
     bullet = new Bullet(vel, this.game)
     this.game.add(bullet);

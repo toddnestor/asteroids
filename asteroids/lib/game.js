@@ -6,7 +6,7 @@ const Asteroid = require('./asteroid');
 function Game() {
   this.addAsteroids();
   this.bullets = [];
-  this.ship = new Ship(Utils.randomVec(800), this);
+  this.ship = new Ship([this.DIM_X / 2, this.DIM_Y / 2], this);
 
   this.img = new Image();
   this.img.src = './lib/background.jpg';

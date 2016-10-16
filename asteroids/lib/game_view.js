@@ -29,7 +29,7 @@ GameView.prototype.start = function() {
   window.requestAnimationFrame(function step(){
     that.game.step();
     that.game.draw(that.ctx);
-    that.game.ship.showStats();
+    that.game.ship.showStats(that.ctx);
     if(that.game.ship.lives_remaining > 0) {
       window.requestAnimationFrame(step);
     } else {
@@ -41,19 +41,19 @@ GameView.prototype.start = function() {
 GameView.prototype.bindKeyHandlers = function() {
   let that = this;
   key('up', function() {
-    that.game.ship.changePower(1);
+    that.game.ship.changePower(3);
   });
 
   key('left', function() {
-    that.game.ship.changeDirection(3);
+    that.game.ship.changeDirection(6);
   });
 
   key('right', function() {
-    that.game.ship.changeDirection(-3);
+    that.game.ship.changeDirection(-6);
   });
 
   key('down', function() {
-    that.game.ship.changePower(-1);
+    that.game.ship.changePower(-3);
   });
 
   key('space', function() {

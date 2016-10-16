@@ -89,7 +89,7 @@
 	  window.requestAnimationFrame(function step(){
 	    that.game.step();
 	    that.game.draw(that.ctx);
-	    that.game.ship.showStats();
+	    that.game.ship.showStats(that.ctx);
 	    if(that.game.ship.lives_remaining > 0) {
 	      window.requestAnimationFrame(step);
 	    } else {
@@ -101,19 +101,19 @@
 	GameView.prototype.bindKeyHandlers = function() {
 	  let that = this;
 	  key('up', function() {
-	    that.game.ship.changePower(1);
+	    that.game.ship.changePower(3);
 	  });
 
 	  key('left', function() {
-	    that.game.ship.changeDirection(3);
+	    that.game.ship.changeDirection(6);
 	  });
 
 	  key('right', function() {
-	    that.game.ship.changeDirection(-3);
+	    that.game.ship.changeDirection(-6);
 	  });
 
 	  key('down', function() {
-	    that.game.ship.changePower(-1);
+	    that.game.ship.changePower(-3);
 	  });
 
 	  key('space', function() {
@@ -140,7 +140,7 @@
 	function Game() {
 	  this.addAsteroids();
 	  this.bullets = [];
-	  this.ship = new Ship(Utils.randomVec(800), this);
+	  this.ship = new Ship([this.DIM_X / 2, this.DIM_Y / 2], this);
 
 	  this.img = new Image();
 	  this.img.src = './lib/background.jpg';
@@ -322,15 +322,14 @@
 	Ship.prototype.MIN_POWER = -Ship.prototype.MAX_POWER;
 	Ship.prototype.MIN_TIME_BETWEEN_BULLETS = 100;
 
-	Ship.prototype.showStats = function() {
-	  document.getElementById('lives-lost').innerHTML = this.lives_remaining;
-	  document.getElementById('asteroids-destroyed').innerHTML = this.asteroids_destroyed;
-	  document.getElementById('bullets-fired').innerHTML = this.bullets_fired;
-	  document.getElementById('score').innerHTML = this.score;
+	Ship.prototype.showStats = function(ctx) {
+	  ctx.fillStyle = "white";
+	  ctx.font = "bold 20px sans-serif";
+	  ctx.fillText(`Lives Remaining: ${this.lives_remaining}   Asteroids Destroyed: ${this.asteroids_destroyed}   Score: ${this.score}`, 15, 25);
 	}
 
 	Ship.prototype.relocate = function() {
-	  this.pos = Utils.randomVec(800);
+	  this.pos = [this.game.DIM_X / 2, this.game.DIM_Y / 2];
 	  this.direction = 90;
 	  this.reset();
 	}
@@ -349,7 +348,7 @@
 	    if(power < 0) power = 0;
 	    this.bullets_fired += 1;
 
-	    let vel = Utils.findNewPoint(0, 0, this.direction, (power + 5));
+	    let vel = Utils.findNewPoint(0, 0, this.direction, 30);
 	    vel = [vel[0], -vel[1]];
 	    bullet = new Bullet(vel, this.game)
 	    this.game.add(bullet);
