@@ -15,7 +15,7 @@ function Game() {
 
 Game.prototype.DIM_X = 1440;
 Game.prototype.DIM_Y = 800;
-Game.prototype.NUM_ASTEROIDS = 1;
+Game.prototype.NUM_ASTEROIDS = 7;
 
 Game.prototype.addAsteroids = function() {
   this.asteroids = [];
@@ -32,13 +32,19 @@ Game.prototype.allObjects = function() {
 }
 
 Game.prototype.draw = function(ctx) {
-
-
   ctx.clearRect(0, 0, this.DIM_X, this.DIM_Y);
   ctx.drawImage(this.img, 0, 0);
   this.allObjects().forEach(asteroid => {
     asteroid.draw(ctx);
   });
+}
+
+Game.prototype.gameOver = function(ctx) {
+  ctx.clearRect(0, 0, this.DIM_X, this.DIM_Y);
+  ctx.drawImage(this.img, 0, 0);
+  ctx.fillStyle = "white";
+  ctx.font = "bold 40px sans-serif";
+  ctx.fillText("Game over!", this.DIM_X/2 - 100, this.DIM_Y/2 - 20);
 }
 
 Game.prototype.moveObjects = function() {
@@ -99,6 +105,7 @@ Game.prototype.remove = function(object) {
   if( object instanceof Asteroid ) {
     let idx = this.asteroids.indexOf( object );
     this.asteroids = this.asteroids.slice(0,idx).concat(this.asteroids.slice(idx+1));
+    this.ship.asteroids_destroyed += 1;
   } else if(object instanceof Bullet) {
     let idx = this.bullets.indexOf( object );
     this.bullets = this.bullets.slice(0,idx).concat(this.bullets.slice(idx+1));

@@ -2,7 +2,7 @@ const Utils = require('./utils');
 const MovingObject = require('./moving_object');
 
 function Asteroid(pos, game) {
-  options = { pos: pos, vel: Utils.randomVec(10, -10), color: Asteroid.randColor(), radius: 30, game: game }
+  options = { pos: pos, vel: Utils.randomVec(5, -5), color: Asteroid.randColor(), radius: Asteroid.randRadius(), game: game }
   MovingObject.call(this, options);
 }
 
@@ -15,6 +15,10 @@ Asteroid.randColor = function() {
   let chosen = Math.floor(Math.random()*colors.length);
 
   return colors[chosen];
+}
+
+Asteroid.randRadius = function() {
+  return Math.round(Math.random() * 30 ) + 20;
 }
 
 Asteroid.prototype.mass = function() {

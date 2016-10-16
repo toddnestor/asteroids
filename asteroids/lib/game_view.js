@@ -1,6 +1,7 @@
 const Game = require('./game');
 const Ship = require('./ship');
-const Util = require('./utils');
+const Utils = require('./utils');
+const Asteroid = require('./asteroid');
 
 function GameView(ctx) {
   this.ctx = ctx ;
@@ -11,10 +12,29 @@ GameView.prototype.start = function() {
   this.bindKeyHandlers();
   let that = this;
 
+  setInterval(function(){
+    if( that.game.asteroids.length < (that.game.NUM_ASTEROIDS) ) {
+      if(Math.round(Math.random() * 10) > 6) {
+        let new_asteroid_count = Math.round(Math.random() * 5) + 1;
+
+        for(let i = 0; i < new_asteroid_count; i++ ) {
+          let pos = Utils.randomVec(that.game.DIM_Y);
+          let asteroid = new Asteroid(pos, that.game);
+          that.game.add(asteroid);
+        }
+      }
+    }
+  }, 5000);
+
   window.requestAnimationFrame(function step(){
     that.game.step();
     that.game.draw(that.ctx);
-    window.requestAnimationFrame(step);
+    that.game.ship.showStats();
+    if(that.game.ship.lives_remaining > 0) {
+      window.requestAnimationFrame(step);
+    } else {
+      that.game.gameOver(that.ctx);
+    }
   });
 }
 
