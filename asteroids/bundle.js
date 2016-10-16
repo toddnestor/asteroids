@@ -48,7 +48,11 @@
 
 	document.addEventListener('DOMContentLoaded', function(){
 	  let ctx = document.getElementById('game-canvas').getContext('2d');
-	  let gameview = new GameView(ctx) ;
+	  let width = Math.min(document.documentElement.clientWidth, window.innerWidth);
+	  let height = Math.min(document.documentElement.clientHeight, window.innerHeight);
+	  document.getElementById('game-canvas').width = width;
+	  document.getElementById('game-canvas').height = height;
+	  let gameview = new GameView(ctx, width, height);
 
 	  gameview.start();
 	});
@@ -63,9 +67,12 @@
 	const Utils = __webpack_require__(3);
 	const Asteroid = __webpack_require__(6);
 
-	function GameView(ctx) {
+	function GameView(ctx, width, height, gameOverCallback = function(){}) {
 	  this.ctx = ctx ;
+	  Game.prototype.DIM_X = width;
+	  Game.prototype.DIM_Y = height;
 	  this.game = new Game();
+	  this.gameOverCallback = gameOverCallback;
 	}
 
 	GameView.prototype.start = function() {
@@ -74,12 +81,11 @@
 
 	  setInterval(function(){
 	    if( that.game.asteroids.length < (that.game.NUM_ASTEROIDS) ) {
-	      if(Math.round(Math.random() * 10) > 6) {
+	      if(that.game.asteroids.length < 1 || Math.round(Math.random() * 10) > 4) {
 	        let new_asteroid_count = Math.round(Math.random() * 5) + 1;
 
 	        for(let i = 0; i < new_asteroid_count; i++ ) {
-	          let pos = Utils.randomVec(that.game.DIM_Y);
-	          let asteroid = new Asteroid(pos, that.game);
+	          let asteroid = new Asteroid(that.game);
 	          that.game.add(asteroid);
 	        }
 	      }
@@ -94,35 +100,47 @@
 	      window.requestAnimationFrame(step);
 	    } else {
 	      that.game.gameOver(that.ctx);
+	      that.game.ship.showStats(that.ctx);
+	      that.gameOverCallback(that.game.ship.score, that.game.ship.asteroids_destroyed);
 	    }
 	  });
 	}
 
+	GameView.prototype.processKey = function(keyCode) {
+	  // 32 = space
+	  // 37 = left
+	  // 38 = up
+	  // 39 = right
+	  // 40 = down
+	  // 88 = x
+	  switch(keyCode) {
+	    case 32:
+	      this.game.ship.fireBullet();
+	    break;
+	    case 37:
+	      this.game.ship.changeDirection(6);
+	    break;
+	    case 38:
+	      this.game.ship.changePower(3);
+	    break;
+	    case 39:
+	      this.game.ship.changeDirection(-6);
+	    break;
+	    case 40:
+	      this.game.ship.changePower(-3);
+	    break;
+	    case 88:
+	      this.game.ship.reset();
+	    break;
+	  }
+	}
+
+	GameView.prototype.processKeys = function() {
+	  key.getPressedKeyCodes().forEach(keyCode => this.processKey(keyCode));
+	}
+
 	GameView.prototype.bindKeyHandlers = function() {
-	  let that = this;
-	  key('up', function() {
-	    that.game.ship.changePower(3);
-	  });
-
-	  key('left', function() {
-	    that.game.ship.changeDirection(6);
-	  });
-
-	  key('right', function() {
-	    that.game.ship.changeDirection(-6);
-	  });
-
-	  key('down', function() {
-	    that.game.ship.changePower(-3);
-	  });
-
-	  key('space', function() {
-	    that.game.ship.fireBullet();
-	  });
-
-	  key('x', function() {
-	    that.game.ship.reset();
-	  })
+	  key('up, left, right, down, space, x', () => this.processKeys() );
 	}
 
 	module.exports = GameView;
@@ -147,16 +165,13 @@
 
 	}
 
-	Game.prototype.DIM_X = 1440;
-	Game.prototype.DIM_Y = 800;
 	Game.prototype.NUM_ASTEROIDS = 7;
 
 	Game.prototype.addAsteroids = function() {
 	  this.asteroids = [];
 
 	  for(let i = 0; i < this.NUM_ASTEROIDS; i++) {
-	    let pos = Utils.randomVec(this.DIM_Y);
-	    let asteroid = new Asteroid(pos, this);
+	    let asteroid = new Asteroid(this);
 	    this.add(asteroid);
 	  }
 	}
@@ -308,16 +323,16 @@
 	function Ship(pos, game) {
 	  options = { pos: pos, vel: [0,0], color: '#E81427', radius: 30, game: game }
 	  this.direction = 90;
-	  this.lives_remaining = 5;
+	  this.lives_remaining = 10;
 	  this.asteroids_destroyed = 0;
 	  this.bullets_fired = 0;
 	  this.power = 0;
 	  this.score = 0;
+	  this.lastRelocated = new Date();
 	  MovingObject.call(this, options);
 	}
 
 	Utils.inherits(Ship , MovingObject);
-
 	Ship.prototype.MAX_POWER = 15;
 	Ship.prototype.MIN_POWER = -Ship.prototype.MAX_POWER;
 	Ship.prototype.MIN_TIME_BETWEEN_BULLETS = 100;
@@ -329,9 +344,15 @@
 	}
 
 	Ship.prototype.relocate = function() {
+	  this.lastRelocated = new Date();
 	  this.pos = [this.game.DIM_X / 2, this.game.DIM_Y / 2];
 	  this.direction = 90;
 	  this.reset();
+	}
+
+	Ship.prototype.canBeHit = function() {
+	  let now = new Date();
+	  return now - this.lastRelocated > 1500;
 	}
 
 	Ship.prototype.reset = function() {
@@ -384,7 +405,7 @@
 	  return this.rotate(pos, this.direction);
 	}
 
-	Ship.prototype.draw = function(ctx) {
+	Ship.prototype.drawShip = function(ctx) {
 	  ctx.fillStyle = this.color;
 	  ctx.beginPath();
 
@@ -401,6 +422,21 @@
 	  ctx.lineTo(...p3);
 
 	  ctx.fill();
+	}
+
+	Ship.prototype.blinkOn = function() {
+	  let now = new Date();
+	  let difference = now - this.lastRelocated;
+
+	  let hundreds = (difference - (difference % 100)) / 100;
+
+	  return hundreds % 2 == 0;
+	}
+
+	Ship.prototype.draw = function(ctx) {
+	  if(this.canBeHit() || this.blinkOn()) {
+	    this.drawShip(ctx);
+	  }
 	}
 
 	Ship.prototype.collideWith = function(otherObject) {
@@ -447,12 +483,26 @@
 	const Utils = __webpack_require__(3);
 	const MovingObject = __webpack_require__(7);
 
-	function Asteroid(pos, game) {
+	function Asteroid(game) {
+	  let pos = this.randomOuterPos(game);
 	  options = { pos: pos, vel: Utils.randomVec(5, -5), color: Asteroid.randColor(), radius: Asteroid.randRadius(), game: game }
 	  MovingObject.call(this, options);
 	}
 
 	Utils.inherits(Asteroid, MovingObject);
+
+	Asteroid.prototype.randomOuterPos = function(game) {
+	  let quarterX = game.DIM_X / 4;
+	  let quarterY = game.DIM_Y / 4;
+
+	  let randX = Math.round(Math.random() * quarterX) - (quarterX/2);
+	  let randY = Math.round(Math.random() * quarterY) - (quarterY/2);
+
+	  let x = randX > 0 ? randX : game.DIM_X + randX;
+	  let y = randY > 0 ? randY : game.DIM_X + randY;
+
+	  return [x,y];
+	}
 
 	Asteroid.randColor = function() {
 	  let colors = [
@@ -473,14 +523,16 @@
 
 	Asteroid.prototype.collideWith = function(otherObject) {
 	  if(otherObject.constructor.name == 'Ship') {
-	    if( this.radius < 150 ) {
-	      this.radius *= 1.1
+	    if( otherObject.canBeHit() ) {
+	      if( this.radius < 150 ) {
+	        this.radius *= 1.1
+	      }
+	      otherObject.relocate();
 	    }
-	    otherObject.relocate();
 	  } else if(otherObject.constructor.name == 'Bullet') {
 	    otherObject.collideWith(this);
 	  } else if(otherObject instanceof Asteroid) {
-
+	    
 	  }
 	}
 

@@ -5,10 +5,21 @@
     <title>Duc and Todd's Asteroids</title>
     <script src="lib/keymaster.js"></script>
     <script src="bundle.js" charset="utf-8"></script>
+    <style media="screen">
+      body {
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+      }
+      canvas {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
   </head>
   <body>
-    <canvas id="game-canvas" width="1440" height="800"></canvas>
-    <div style="float: right;">
+    <canvas id="game-canvas"></canvas>
+    <div style="float: right; display:none;">
       <h2>Instructions</h2>
       <ul>
         <li>Use the up and down arrows to move forward or backwards.</li>

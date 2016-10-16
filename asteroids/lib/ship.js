@@ -6,16 +6,16 @@ let lastBulletFired = null;
 function Ship(pos, game) {
   options = { pos: pos, vel: [0,0], color: '#E81427', radius: 30, game: game }
   this.direction = 90;
-  this.lives_remaining = 5;
+  this.lives_remaining = 10;
   this.asteroids_destroyed = 0;
   this.bullets_fired = 0;
   this.power = 0;
   this.score = 0;
+  this.lastRelocated = new Date();
   MovingObject.call(this, options);
 }
 
 Utils.inherits(Ship , MovingObject);
-
 Ship.prototype.MAX_POWER = 15;
 Ship.prototype.MIN_POWER = -Ship.prototype.MAX_POWER;
 Ship.prototype.MIN_TIME_BETWEEN_BULLETS = 100;
@@ -27,9 +27,15 @@ Ship.prototype.showStats = function(ctx) {
 }
 
 Ship.prototype.relocate = function() {
+  this.lastRelocated = new Date();
   this.pos = [this.game.DIM_X / 2, this.game.DIM_Y / 2];
   this.direction = 90;
   this.reset();
+}
+
+Ship.prototype.canBeHit = function() {
+  let now = new Date();
+  return now - this.lastRelocated > 1500;
 }
 
 Ship.prototype.reset = function() {
@@ -82,7 +88,7 @@ Ship.prototype.rotatedPos = function(pos) {
   return this.rotate(pos, this.direction);
 }
 
-Ship.prototype.draw = function(ctx) {
+Ship.prototype.drawShip = function(ctx) {
   ctx.fillStyle = this.color;
   ctx.beginPath();
 
@@ -99,6 +105,21 @@ Ship.prototype.draw = function(ctx) {
   ctx.lineTo(...p3);
 
   ctx.fill();
+}
+
+Ship.prototype.blinkOn = function() {
+  let now = new Date();
+  let difference = now - this.lastRelocated;
+
+  let hundreds = (difference - (difference % 100)) / 100;
+
+  return hundreds % 2 == 0;
+}
+
+Ship.prototype.draw = function(ctx) {
+  if(this.canBeHit() || this.blinkOn()) {
+    this.drawShip(ctx);
+  }
 }
 
 Ship.prototype.collideWith = function(otherObject) {

@@ -13,16 +13,13 @@ function Game() {
 
 }
 
-Game.prototype.DIM_X = 1440;
-Game.prototype.DIM_Y = 800;
 Game.prototype.NUM_ASTEROIDS = 7;
 
 Game.prototype.addAsteroids = function() {
   this.asteroids = [];
 
   for(let i = 0; i < this.NUM_ASTEROIDS; i++) {
-    let pos = Utils.randomVec(this.DIM_Y);
-    let asteroid = new Asteroid(pos, this);
+    let asteroid = new Asteroid(this);
     this.add(asteroid);
   }
 }
