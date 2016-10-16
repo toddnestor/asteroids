@@ -81,19 +81,19 @@
 	GameView.prototype.bindKeyHandlers = function() {
 	  let that = this;
 	  key('up', function() {
-	    that.game.ship.power([0,-1]);
+	    that.game.ship.changePower(1);
 	  });
 
 	  key('left', function() {
-	    that.game.ship.direction -= 3;
+	    that.game.ship.changeDirection(3);
 	  });
 
 	  key('right', function() {
-	    that.game.ship.direction += 3;
+	    that.game.ship.changeDirection(-3);
 	  });
 
 	  key('down', function() {
-	    that.game.ship.power([0,1]);
+	    that.game.ship.changePower(-1);
 	  });
 
 	  key('space', function() {
@@ -101,7 +101,7 @@
 	  });
 
 	  key('x', function() {
-	    that.game.ship.vel = [0,0];
+	    that.game.ship.reset();
 	  })
 	}
 
@@ -253,6 +253,16 @@
 	    let nx = (cos * (x - cx)) + (sin * (y - cy)) + cx;
 	    let ny = (cos * (y - cy)) - (sin * (x - cx)) + cy;
 	    return [nx, ny];
+	  },
+
+	  findNewPoint: function(x, y, angle, distance) {
+	    let result = [];
+	    let radians = this.radians(angle);
+
+	    result.push( Math.round(Math.cos(radians) * distance + x));
+	    result.push( Math.round(Math.sin(radians) * distance + y));
+
+	    return result;
 	  }
 	}
 
@@ -269,8 +279,9 @@
 
 	function Ship(pos, game) {
 	  options = { pos: pos, vel: [0,0], color: '#E81427', radius: 30, game: game }
-	  this.direction = 0;
+	  this.direction = 90;
 	  this.lives_lost = 0;
+	  this.power = 0;
 	  MovingObject.call(this, options);
 	}
 
@@ -278,19 +289,44 @@
 
 	Ship.prototype.relocate = function() {
 	  this.pos = Utils.randomVec(800);
-	  this.direction = 0;
-	  this.lives_lost += 1;
-	  this.vel = [0,0];
+	  this.direction = 90;
+	  this.reset();
 	}
 
-	Ship.prototype.power = function(impulse) {
-	  this.vel[0] += impulse[0];
-	  this.vel[1] += impulse[1];
+	Ship.prototype.reset = function() {
+	  this.lives_lost += 1;
+	  this.vel = [0,0];
+	  this.power = 0;
 	}
 
 	Ship.prototype.fireBullet = function() {
-	  bullet = new Bullet(this.game)
+	  let power = this.power * 1.2;
+	  if(power < 0) power = 0;
+
+	  let vel = Utils.findNewPoint(0, 0, this.direction, (power + 5));
+	  vel = [vel[0], -vel[1]];
+	  bullet = new Bullet(vel, this.game)
 	  this.game.add(bullet);
+	}
+
+	Ship.prototype.slope = function() {
+	  return Math.tan(Utils.radians(this.direction));
+	}
+
+	Ship.prototype.newVel = function(x = 0, y = 0) {
+	  let vel = Utils.findNewPoint(x, y, this.direction, this.power);
+
+	  return [vel[0], -vel[1]];
+	}
+
+	Ship.prototype.changePower = function(amount) {
+	  this.power += amount;
+	  this.vel = this.newVel();
+	}
+
+	Ship.prototype.changeDirection = function(direction) {
+	  this.direction += direction;
+	  this.vel = this.newVel();
 	}
 
 	Ship.prototype.rotatedPos = function(pos) {
@@ -305,9 +341,9 @@
 	  let y = this.pos[1];
 	  let r = this.radius;
 
-	  let p1 = this.rotatedPos([x, y + r]);
-	  let p2 = this.rotatedPos([x + r/2, y - r]);
-	  let p3 = this.rotatedPos([x - r/2, y - r]);
+	  let p1 = this.rotatedPos([x + r, y]);
+	  let p2 = this.rotatedPos([x - r, y + r/2]);
+	  let p3 = this.rotatedPos([x - r, y - r/2]);
 
 	  ctx.moveTo(...p1);
 	  ctx.lineTo(...p2);
@@ -333,8 +369,8 @@
 	const Asteroid = __webpack_require__(6);
 	const MovingObject = __webpack_require__(7);
 
-	function Bullet(game) {
-	  options = { pos: game.ship.pos.slice(0), vel: Bullet.getVelocity(game), color: '#00FF00', radius: 5, game: game }
+	function Bullet(vel, game) {
+	  options = { pos: game.ship.pos.slice(0), vel: vel, color: '#00FF00', radius: 5, game: game }
 	    MovingObject.call(this, options);
 	}
 
@@ -342,20 +378,10 @@
 
 	Bullet.prototype.isWrappable = false;
 
-	Bullet.getVelocity = function(game) {
-	  let ship_vel = game.ship.vel.slice(0);
-	  return ship_vel.map( n => {
-	    if( n == 0 ) {
-	      return 3;
-	    } else {
-	      return n*5
-	    }
-	  })
-	}
-
 	Bullet.prototype.collideWith = function(otherObject) {
 	  if(otherObject instanceof Asteroid) {
 	    this.game.remove(otherObject);
+	    this.game.remove(this);
 	  }
 	}
 

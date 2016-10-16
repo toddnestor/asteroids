@@ -21,19 +21,19 @@ GameView.prototype.start = function() {
 GameView.prototype.bindKeyHandlers = function() {
   let that = this;
   key('up', function() {
-    that.game.ship.power([0,-1]);
+    that.game.ship.changePower(1);
   });
 
   key('left', function() {
-    that.game.ship.direction -= 3;
+    that.game.ship.changeDirection(3);
   });
 
   key('right', function() {
-    that.game.ship.direction += 3;
+    that.game.ship.changeDirection(-3);
   });
 
   key('down', function() {
-    that.game.ship.power([0,1]);
+    that.game.ship.changePower(-1);
   });
 
   key('space', function() {
@@ -41,7 +41,7 @@ GameView.prototype.bindKeyHandlers = function() {
   });
 
   key('x', function() {
-    that.game.ship.vel = [0,0];
+    that.game.ship.reset();
   })
 }
 

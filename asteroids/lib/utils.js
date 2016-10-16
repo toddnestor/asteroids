@@ -25,6 +25,16 @@ const Utils = {
     let nx = (cos * (x - cx)) + (sin * (y - cy)) + cx;
     let ny = (cos * (y - cy)) - (sin * (x - cx)) + cy;
     return [nx, ny];
+  },
+
+  findNewPoint: function(x, y, angle, distance) {
+    let result = [];
+    let radians = this.radians(angle);
+
+    result.push( Math.round(Math.cos(radians) * distance + x));
+    result.push( Math.round(Math.sin(radians) * distance + y));
+
+    return result;
   }
 }
 
