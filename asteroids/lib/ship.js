@@ -54,7 +54,7 @@ Ship.prototype.fireBullet = function() {
 
     let vel = Utils.findNewPoint(0, 0, this.direction, 30);
     vel = [vel[0], -vel[1]];
-    bullet = new Bullet(vel, this.game)
+    bullet = new Bullet(vel, this.game);
     this.game.add(bullet);
   }
 }

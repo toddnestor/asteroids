@@ -47,14 +47,73 @@
 	const GameView = __webpack_require__(1);
 
 	document.addEventListener('DOMContentLoaded', function(){
+	  $.herc.configure({
+	      api_key: '89a3e25de96b124db26e353574c5ae9507a52af703a0a435aecdbb7b7c57'
+	  });
+
+	  function getHighScores(callback) {
+	    $.herc.Objects().getAll(
+	      {type: 'high-score'},
+	      callback
+	    );
+	  }
+
+	  function saveHighScore(score, asteroids, name, callback) {
+	    data = {
+	      type: 'high-score',
+	      name: name,
+	      field_score: score,
+	      field_asteroids: asteroids
+	    }
+
+	    $.herc.Objects().post(data, callback);
+	  }
+
 	  let ctx = document.getElementById('game-canvas').getContext('2d');
 	  let width = Math.min(document.documentElement.clientWidth, window.innerWidth);
 	  let height = Math.min(document.documentElement.clientHeight, window.innerHeight);
 	  document.getElementById('game-canvas').width = width;
 	  document.getElementById('game-canvas').height = height;
-	  let gameview = new GameView(ctx, width, height);
 
-	  gameview.start();
+	  function startGame() {
+	    let gameview = new GameView(ctx, width, height, function(score, asteroids){
+	      getHighScores(function(scores){
+	        $('#scores').html('');
+
+	        scores = scores.sort((a,b) => {
+	          return b.score > a.score ? -1 : 1;
+	        });
+
+	        $(scores).each(function(){
+	          $('#scores').append($('<li>').append(`<strong>${this.name}</strong> - <strong>Score:</strong> ${this.meta_data.score}  <strong>Asteroids Destroyed:</strong>  ${this.meta_data.asteroids}`));
+	        });
+
+	        $('#score').html(score);
+	        $('#asteroids').html(asteroids);
+	        $('.score-form').show();
+	        $('#high-scores-modal').modal();
+	        $('.save-score').click(function(e){
+	          e.preventDefault();
+	          saveHighScore(score, asteroids, $('#name').val(), function(response){
+	            $('#name').val('');
+	            $('.score-form').hide();
+	            $('.new-game').show();
+	          });
+	        });
+	      });
+	    });
+
+	    gameview.start();
+	  }
+
+	  startGame();
+
+	  $('body').on('click', '.new-game', function(e){
+	    e.preventDefault();
+	    $('.new-game').hide();
+	    $('#high-scores-modal').modal('hide')
+	    startGame();
+	  });
 	});
 
 
@@ -165,7 +224,7 @@
 
 	}
 
-	Game.prototype.NUM_ASTEROIDS = 7;
+	Game.prototype.NUM_ASTEROIDS = 15;
 
 	Game.prototype.addAsteroids = function() {
 	  this.asteroids = [];
@@ -375,7 +434,7 @@
 
 	    let vel = Utils.findNewPoint(0, 0, this.direction, 30);
 	    vel = [vel[0], -vel[1]];
-	    bullet = new Bullet(vel, this.game)
+	    bullet = new Bullet(vel, this.game);
 	    this.game.add(bullet);
 	  }
 	}
@@ -551,6 +610,17 @@
 
 	Bullet.prototype.collideWith = function(otherObject) {
 	  if(otherObject instanceof Asteroid) {
+	    if(otherObject.radius >= 30) {
+	      let halfRadius = otherObject.radius/2;
+	      let oldVel = otherObject.vel;
+	      let oldPos = otherObject.pos;
+	      let new_vel1 = [oldVel[0] + oldVel[1]/2, oldVel[1]];
+	      let new_vel2 = [oldVel[0], oldVel[1] + oldVel[0]/2];
+	      let new_pos1 = [oldPos[0] - halfRadius, oldPos[1] - otherObject.radius/2];
+	      let new_pos2 = [oldPos[0] + halfRadius, oldPos[1] + otherObject.radius/2];
+	      this.game.add(new Asteroid(this.game, new_pos2, new_vel1, halfRadius));
+	      this.game.add(new Asteroid(this.game, new_pos1, new_vel2, halfRadius));
+	    }
 	    this.game.remove(otherObject);
 	    this.game.remove(this);
 	    this.game.ship.score += Math.round(otherObject.radius);
@@ -567,9 +637,11 @@
 	const Utils = __webpack_require__(3);
 	const MovingObject = __webpack_require__(7);
 
-	function Asteroid(game) {
-	  let pos = this.randomOuterPos(game);
-	  options = { pos: pos, vel: Utils.randomVec(5, -5), color: Asteroid.randColor(), radius: Asteroid.randRadius(), game: game }
+	function Asteroid(game, pos = null, vel = null, radius = null) {
+	  pos = pos || this.randomOuterPos(game);
+	  vel = vel || Utils.randomVec(5, -5);
+	  radius = radius || Asteroid.randRadius();
+	  options = { pos: pos, vel: vel, color: Asteroid.randColor(), radius: radius, game: game }
 	  MovingObject.call(this, options);
 	  this.el1Angle = Math.random() * 90;
 	  this.el2Angle = Math.random() * 90 + 180;
@@ -618,7 +690,10 @@
 	  } else if(otherObject.constructor.name == 'Bullet') {
 	    otherObject.collideWith(this);
 	  } else if(otherObject instanceof Asteroid) {
-
+	    // let ourNewVel = [this.vel[1], this.vel[0]];
+	    // let theirNewVel = [otherObject.vel[1], otherObject.vel[0]];
+	    // this.vel = ourNewVel;
+	    // otherObject.vel = theirNewVel;
 	  }
 	}
 

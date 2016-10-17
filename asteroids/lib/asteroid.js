@@ -1,9 +1,11 @@
 const Utils = require('./utils');
 const MovingObject = require('./moving_object');
 
-function Asteroid(game) {
-  let pos = this.randomOuterPos(game);
-  options = { pos: pos, vel: Utils.randomVec(5, -5), color: Asteroid.randColor(), radius: Asteroid.randRadius(), game: game }
+function Asteroid(game, pos = null, vel = null, radius = null) {
+  pos = pos || this.randomOuterPos(game);
+  vel = vel || Utils.randomVec(5, -5);
+  radius = radius || Asteroid.randRadius();
+  options = { pos: pos, vel: vel, color: Asteroid.randColor(), radius: radius, game: game }
   MovingObject.call(this, options);
   this.el1Angle = Math.random() * 90;
   this.el2Angle = Math.random() * 90 + 180;
@@ -52,7 +54,10 @@ Asteroid.prototype.collideWith = function(otherObject) {
   } else if(otherObject.constructor.name == 'Bullet') {
     otherObject.collideWith(this);
   } else if(otherObject instanceof Asteroid) {
-
+    // let ourNewVel = [this.vel[1], this.vel[0]];
+    // let theirNewVel = [otherObject.vel[1], otherObject.vel[0]];
+    // this.vel = ourNewVel;
+    // otherObject.vel = theirNewVel;
   }
 }
 

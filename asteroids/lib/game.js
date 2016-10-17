@@ -13,7 +13,7 @@ function Game() {
 
 }
 
-Game.prototype.NUM_ASTEROIDS = 7;
+Game.prototype.NUM_ASTEROIDS = 15;
 
 Game.prototype.addAsteroids = function() {
   this.asteroids = [];
