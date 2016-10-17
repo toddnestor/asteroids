@@ -5,7 +5,7 @@ let lastBulletFired = null;
 
 function Ship(pos, game) {
   options = { pos: pos, vel: [0,0], color: '#42abb1', radius: 30, game: game }
-  this.direction = 0;
+  this.direction = 90;
   this.lives_remaining = 10;
   this.asteroids_destroyed = 0;
   this.bullets_fired = 0;
