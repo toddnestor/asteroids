@@ -618,8 +618,8 @@
 	      let new_vel2 = [oldVel[0], oldVel[1] + oldVel[0]/2];
 	      let new_pos1 = [oldPos[0] - halfRadius, oldPos[1] - otherObject.radius/2];
 	      let new_pos2 = [oldPos[0] + halfRadius, oldPos[1] + otherObject.radius/2];
-	      this.game.add(new Asteroid(this.game, new_pos2, new_vel1, halfRadius));
-	      this.game.add(new Asteroid(this.game, new_pos1, new_vel2, halfRadius));
+	      this.game.add(new Asteroid(this.game, new_pos2, new_vel1, halfRadius + 10));
+	      this.game.add(new Asteroid(this.game, new_pos1, new_vel2, halfRadius + 10));
 	    }
 	    this.game.remove(otherObject);
 	    this.game.remove(this);
