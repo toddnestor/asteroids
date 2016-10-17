@@ -43,14 +43,14 @@ Asteroid.prototype.collideWith = function(otherObject) {
   if(otherObject.constructor.name == 'Ship') {
     if( otherObject.canBeHit() ) {
       if( this.radius < 150 ) {
-        this.radius *= 1.1
+        this.radius *= 1.5
       }
       otherObject.relocate();
     }
   } else if(otherObject.constructor.name == 'Bullet') {
     otherObject.collideWith(this);
   } else if(otherObject instanceof Asteroid) {
-    
+
   }
 }
 

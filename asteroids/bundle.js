@@ -321,8 +321,8 @@
 	let lastBulletFired = null;
 
 	function Ship(pos, game) {
-	  options = { pos: pos, vel: [0,0], color: '#E81427', radius: 30, game: game }
-	  this.direction = 90;
+	  options = { pos: pos, vel: [0,0], color: '#42abb1', radius: 30, game: game }
+	  this.direction = 0;
 	  this.lives_remaining = 10;
 	  this.asteroids_destroyed = 0;
 	  this.bullets_fired = 0;
@@ -413,13 +413,93 @@
 	  let y = this.pos[1];
 	  let r = this.radius;
 
-	  let p1 = this.rotatedPos([x + r, y]);
-	  let p2 = this.rotatedPos([x - r, y + r/2]);
-	  let p3 = this.rotatedPos([x - r, y - r/2]);
+	  let p1 = [x + r, y];
+	  let p2 = [x - r, y + r/4];
+	  let p3 = [x - r, y - r/4];
+
+	  let bezConX1 = x + this.radius / 4;
+	  let bezConY1 = y + (this.radius / 3 * 2);
+	  let bezConX2 = x - this.radius / 3;
+	  let bezConY2 = y + (this.radius / 3 * 2);
+
+	  let invBezConX2 = x + this.radius / 4;
+	  let invBezConY2 = y - (this.radius / 3 * 2);
+	  let invBezConX1 = x - this.radius / 3;
+	  let invBezConY1 = y - (this.radius / 3 * 2);
+
+	  p1 = this.rotatedPos(p1);
+	  p2 = this.rotatedPos(p2);
+	  p3 = this.rotatedPos(p3);
+
+	  let bezCon1 = this.rotatedPos([bezConX1, bezConY1]);
+	  let bezCon2 = this.rotatedPos([bezConX2, bezConY2]);
+	  let invBezCon1 = this.rotatedPos([invBezConX1, invBezConY1]);
+	  let invBezCon2 = this.rotatedPos([invBezConX2, invBezConY2]);
 
 	  ctx.moveTo(...p1);
-	  ctx.lineTo(...p2);
+	  ctx.bezierCurveTo(...bezCon1, ...bezCon2, ...p2);
 	  ctx.lineTo(...p3);
+	  ctx.bezierCurveTo(...invBezCon1, ...invBezCon2, ...p1);
+
+	  let circleX = x + (this.radius/3);
+	  let circleY = y;
+	  let circleCenter = this.rotatedPos([circleX, circleY]);
+
+	  ctx.fill();
+
+	  ctx.fillStyle = '#accf57';
+	  ctx.beginPath();
+
+	  ctx.arc(
+	    circleCenter[0],
+	    circleCenter[1],
+	    this.radius / 4.5,
+	    0,
+	    2 * Math.PI,
+	    false
+	  );
+
+	  ctx.fill();
+	  let fin1Start = this.rotatedPos([invBezConX1, invBezConY1 + this.radius / 5]);
+	  let fin1Corner = this.rotatedPos([x - this.radius - this.radius/2, y - this.radius/2]);
+	  let finBezCon1X = invBezConX1 - this.radius/3;
+	  let finBezCon1Y = (invBezConY1 + this.radius / 5) - this.radius/2;
+	  let finBezCon1 = this.rotatedPos([finBezCon1X, finBezCon1Y]);
+	  let fin2BezCon1 = this.rotatedPos([finBezCon1X - this.radius/2, finBezCon1Y + this.radius/2]);
+
+	  let finBezCon2X = finBezCon1X - this.radius/3;
+	  let finBezCon2 = this.rotatedPos([finBezCon2X, finBezCon1Y]);
+	  let fin2BezCon2 = this.rotatedPos([finBezCon2X, finBezCon1Y + this.radius/2]);
+
+	  ctx.moveTo(...fin1Start);
+	  ctx.bezierCurveTo(...finBezCon1, ...finBezCon2, ...fin1Corner);
+	  ctx.bezierCurveTo(...fin2BezCon1, ...fin2BezCon2, ...p3);
+	  ctx.fill();
+
+	  let fin2Start = this.rotatedPos([invBezConX1, bezConY1 - this.radius / 5]);
+	  let fin2Corner = this.rotatedPos([x - this.radius - this.radius/2, y + this.radius/2]);
+	  let fin2Con1Y = (bezConY2 - this.radius / 5) + this.radius/2;
+	  let fin2Con1 = this.rotatedPos([finBezCon1X, fin2Con1Y]);
+	  let fin2Con2 = this.rotatedPos([finBezCon2X, fin2Con1Y]);
+
+	  let fin2bCon1 = this.rotatedPos([finBezCon1X - this.radius/2, fin2Con1Y - this.radius/2]);
+	  let fin2bCon2 = this.rotatedPos([finBezCon2X, fin2Con1Y - this.radius/2]);
+	  ctx.moveTo(...fin2Start);
+	  ctx.bezierCurveTo(...fin2Con1, ...fin2Con2, ...fin2Corner);
+	  ctx.bezierCurveTo(...fin2bCon1, ...fin2bCon2, ...p2);
+	  // ctx.lineTo(...p2);
+	  ctx.fill();
+
+	  ctx.fillStyle = '#023b4e';
+	  ctx.beginPath();
+	  ctx.arc(
+	    circleCenter[0],
+	    circleCenter[1],
+	    this.radius / 6,
+	    0,
+	    2 * Math.PI,
+	    false
+	  );
 
 	  ctx.fill();
 	}
@@ -525,14 +605,14 @@
 	  if(otherObject.constructor.name == 'Ship') {
 	    if( otherObject.canBeHit() ) {
 	      if( this.radius < 150 ) {
-	        this.radius *= 1.1
+	        this.radius *= 1.5
 	      }
 	      otherObject.relocate();
 	    }
 	  } else if(otherObject.constructor.name == 'Bullet') {
 	    otherObject.collideWith(this);
 	  } else if(otherObject instanceof Asteroid) {
-	    
+
 	  }
 	}
 
