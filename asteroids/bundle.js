@@ -572,7 +572,7 @@
 	  options = { pos: pos, vel: Utils.randomVec(5, -5), color: Asteroid.randColor(), radius: Asteroid.randRadius(), game: game }
 	  MovingObject.call(this, options);
 	  this.el1Angle = Math.random() * 90;
-	  this.el2Angle = Math.random() * 90 + 90;
+	  this.el2Angle = Math.random() * 90 + 180;
 	}
 
 	Utils.inherits(Asteroid, MovingObject);
