@@ -54,7 +54,13 @@
 	  function getHighScores(callback) {
 	    $.herc.Objects().getAll(
 	      {type: 'high-score'},
-	      callback
+	      function(scores) {
+	        scores = scores.sort((a,b) => {
+	          return parseInt(b.meta_data.score) > parseInt(a.meta_data.score) ? 1 : -1;
+	        });
+
+	        callback(scores);
+	      }
 	    );
 	  }
 
@@ -79,10 +85,6 @@
 	    let gameview = new GameView(ctx, width, height, function(score, asteroids){
 	      getHighScores(function(scores){
 	        $('#scores').html('');
-
-	        scores = scores.sort((a,b) => {
-	          return b.score > a.score ? -1 : 1;
-	        });
 
 	        $(scores).each(function(){
 	          $('#scores').append($('<li>').append(`<strong>${this.name}</strong> - <strong>Score:</strong> ${this.meta_data.score}  <strong>Asteroids Destroyed:</strong>  ${this.meta_data.asteroids}`));
