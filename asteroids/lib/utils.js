@@ -10,6 +10,10 @@ const Utils = {
     let x = Math.floor(Math.random()*(length - minimum)) + minimum;
     let y = Math.floor(Math.random()*(length - minimum)) + minimum;
 
+    if( x === 0 && y === 0 ) {
+      x = 1;
+    }
+
     return [x, y];
   },
 

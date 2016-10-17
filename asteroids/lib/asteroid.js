@@ -5,6 +5,8 @@ function Asteroid(game) {
   let pos = this.randomOuterPos(game);
   options = { pos: pos, vel: Utils.randomVec(5, -5), color: Asteroid.randColor(), radius: Asteroid.randRadius(), game: game }
   MovingObject.call(this, options);
+  this.el1Angle = Math.random() * 90;
+  this.el2Angle = Math.random() * 90 + 90;
 }
 
 Utils.inherits(Asteroid, MovingObject);
@@ -53,5 +55,62 @@ Asteroid.prototype.collideWith = function(otherObject) {
 
   }
 }
+
+Asteroid.prototype.draw = function(ctx) {
+  ctx.fillStyle = '#000000';
+  ctx.beginPath();
+
+  ctx.arc(
+    this.pos[0],
+    this.pos[1],
+    this.radius,
+    0,
+    2 * Math.PI,
+    false
+  );
+
+  ctx.fill();
+  ctx.fillStyle = '#d3d1e7';
+  ctx.beginPath();
+
+  ctx.arc(
+    this.pos[0],
+    this.pos[1],
+    this.radius - 3,
+    0,
+    2 * Math.PI,
+    false
+  );
+
+  ctx.fill();
+
+  ctx.fillStyle = '#000000';
+  ctx.beginPath();
+  let el1Center = [this.pos[0] + this.radius/4, this.pos[1] - this.radius/2];
+  el1Center = this.rotate(el1Center, this.el1Angle);
+  ctx.ellipse(
+    ...el1Center,
+    this.radius/5,
+    this.radius/6,
+    Utils.radians(45),
+    Utils.radians(30),
+    Utils.radians(20)
+  );
+  ctx.stroke();
+  ctx.beginPath();
+  let el2Center = [this.pos[0] + this.radius/4, this.pos[1] - this.radius/2];
+  el2Center = this.rotate(el2Center, this.el2Angle);
+
+  ctx.ellipse(
+    ...el2Center,
+    this.radius/5,
+    this.radius/6,
+    Utils.radians(45),
+    Utils.radians(30),
+    Utils.radians(20)
+  );
+  ctx.stroke();
+}
+
 
 module.exports = Asteroid;
